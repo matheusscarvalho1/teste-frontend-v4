@@ -1,16 +1,18 @@
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
+import Map from "../map/map";
 
 export const Homepage = () => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <h1 className="text-3xl font-bold underline text-blue-600 hover:text-blue-800">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100">
+      {/* <h1 className="text-3xl font-bold text-blue-600 underline hover:text-blue-800">
         Hello World!
       </h1>
-      <Button className="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 pointer">
+      <Button className="pointer mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700">
         Teste
       </Button>
-      <Input placeholder="Digite seu nome" className="mt-4 w-2xl" />
+      <Input placeholder="Digite seu nome" className="mt-4 w-2xl" /> */}
+      <Map />
     </div>
   );
 };
