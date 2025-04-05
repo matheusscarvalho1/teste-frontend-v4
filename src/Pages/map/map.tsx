@@ -14,6 +14,7 @@ import {
   useMap,
 } from "react-leaflet";
 
+import { Progress } from "../../components/ui/progress";
 import {
   IEquipment,
   IEquipmentModel,
@@ -89,7 +90,7 @@ const Map = () => {
     fetchData();
   }, []);
 
-  if (loading) return <p>Carregando...</p>;
+  if (loading) return <Progress value={33} />;
   if (error) return <p>{error}</p>;
 
   // Para cada equipamento, pega a posição mais recente
@@ -133,9 +134,9 @@ const Map = () => {
   });
 
   // Extrai somente os pares [lat, lon] para serem usados nos limites do mapa
-  const bounds: [number, number][] = latestPositionsWithState.map((p) => [
-    p.lat,
-    p.lon,
+  const bounds: [number, number][] = latestPositionsWithState.map((position) => [
+    position.lat,
+    position.lon,
   ]);
 
   return (
@@ -158,53 +159,71 @@ const Map = () => {
           <MapBounds positions={bounds} />
 
           {/* Renderiza um marcador para cada posição mais recente */}
-          {latestPositionsWithState.map((p) => (
-            <Marker key={p.equipmentId} position={[p.lat, p.lon]}>
-              <Popup minWidth={200}>
+          {latestPositionsWithState.map((item) => (
+            <Marker key={item.equipmentId} position={[item.lat, item.lon]}>
+              <Popup minWidth={250}>
                 <div className="max-h-60 overflow-y-auto text-sm">
+                  <h3 className="mb-2 pb-1 text-sm font-semibold">
+                    Histórico de status
+                  </h3>
+
                   {mapPosition
-                    .find((e) => e.equipmentId === p.equipmentId)
-                    ?.positions.sort(
-                      (a, b) =>
-                        new Date(b.date).getTime() - new Date(a.date).getTime(),
-                    )
-                    .slice(0, 8) // mostra os 5 registros mais recentes
-                    .map((pos, index) => {
-                      const stateHist = stateHistory
-                        .find((s) => s.equipmentId === p.equipmentId)
-                        ?.states.filter(
-                          (s) => new Date(s.date) <= new Date(pos.date),
-                        )
-                        .sort(
-                          (a, b) =>
-                            new Date(b.date).getTime() -
-                            new Date(a.date).getTime(),
-                        )[0];
+  .find((posData) => posData.equipmentId === item.equipmentId) // Corrigido
+  ?.positions
+  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  .slice(0, 5)
+  .map((pos, index) => {
+    const stateHistories = stateHistory.find(
+      (s) => s.equipmentId === item.equipmentId,
+    )?.states || [];
 
-                      const state = equipmentStates.find(
-                        (s) => s.id === stateHist?.equipmentStateId,
-                      );
+    // Aqui, para cada posição, buscamos o último estado ANTES ou IGUAL à data da posição
+    const matchingState = stateHistories
+      .filter((s) => new Date(s.date) <= new Date(pos.date))
+      .sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+      )[0];
 
-                      return (
-                        <div key={index} className="mb-3 border-b pb-2">
-                          <div>🕒 {new Date(pos.date).toLocaleString()}</div>
-                          <div>
-                            📍 {pos.lat.toFixed(5)}, {pos.lon.toFixed(5)}
-                          </div>
-                          <div>
-                            ✅{" "}
-                            <span
-                              style={{
-                                color: state?.color ?? "#000",
-                                fontWeight: "bold",
-                              }}
-                            >
-                              {state?.name ?? "Desconhecido"}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
+    const state = equipmentStates.find(
+      (s) => s.id === matchingState?.equipmentStateId,
+    );
+
+    return (
+      <div key={index} className="mb-3 border-b pb-2">
+        <div className="flex items-center gap-2">
+          <span className="text-gray-500">📅</span>
+          {new Date(pos.date).toLocaleString()}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-gray-500">📍</span>
+          Lat: {pos.lat.toFixed(5)}, Long: {pos.lon.toFixed(5)}
+        </div>
+
+        <div className="flex items-center gap-2">
+          Status:
+          {state?.name === "Parado" ? (
+            <span className="text-red-500">⛔</span>
+          ) : state?.name === "Manutenção" ? (
+            <span className="text-yellow-500">🛠️</span>
+          ) : state?.name === "Operando" ? (
+            <span className="text-green-500">✅</span>
+          ) : (
+            <span className="text-gray-500">❓</span>
+          )}
+
+          <span
+            style={{
+              color: state?.color ?? "#000",
+              fontWeight: "bold",
+            }}
+          >
+            {state?.name ?? "Desconhecido"}
+          </span>
+        </div>
+      </div>
+    );
+  })}
                 </div>
               </Popup>
               <Tooltip
@@ -214,27 +233,27 @@ const Map = () => {
                 permanent={false}
               >
                 <strong>Equipamento: </strong>
-                {p.equipmentName}
+                {item.equipmentName}
                 <br />
                 <div>
-                  <strong>Modelo:</strong> {p.modelName}
+                  <strong>Modelo:</strong> {item.modelName}
                   <br />
-                  <strong>Estado:</strong>{" "}
+                  <strong>Estado:</strong>&nbsp;
                   <span
                     style={{
-                      color: p.stateColor,
+                      color: item.stateColor,
                       fontWeight: "bold",
                     }}
                   >
-                    {p.stateName}
+                    {item.stateName}
                   </span>
                   <br />
-                  <strong>Ultima atualização:</strong>{" "}
-                  {new Date(p.date).toLocaleString()}
+                  <strong>Ultima atualização:</strong>&nbsp;
+                  {new Date(item.date).toLocaleString()}
                   <br />
-                  <strong>Latitude:</strong> {p.lat}
+                  <strong>Latitude:</strong> {item.lat}
                   <br />
-                  <strong>Longitude:</strong> {p.lon}
+                  <strong>Longitude:</strong> {item.lon}
                   <br />
                 </div>
               </Tooltip>
