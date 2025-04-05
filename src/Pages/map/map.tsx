@@ -99,28 +99,27 @@ const Map = () => {
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
     );
     const latestPos = sortedPositions[0];
-
-    const stateInfo = stateHistory.find(
+  
+    const stateHistories = stateHistory.find(
       (s) => s.equipmentId === equipment.equipmentId,
-    );
-
-    const sortedStates = [...(stateInfo?.states || [])].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-    );
-    const latestState = sortedStates[0];
+    )?.states || [];
+  
+    const matchingState = stateHistories
+      .filter((s) => new Date(s.date) <= new Date(latestPos.date))
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+  
     const stateDetails = equipmentStates.find(
-      (s) => s.id === latestState?.equipmentStateId,
+      (s) => s.id === matchingState?.equipmentStateId,
     );
-
+  
     const equipmentInfo = equipmentList.find(
       (e) => e.id === equipment.equipmentId,
     );
-
-    // Dados do modelo
+  
     const modelInfo = equipmentModels.find(
       (m) => m.id === equipmentInfo?.equipmentModelId,
     );
-
+  
     return {
       equipmentId: equipment.equipmentId,
       lat: latestPos.lat,
@@ -197,11 +196,14 @@ const Map = () => {
 
         <div className="flex items-center gap-2">
           <span className="text-gray-500">📍</span>
-          Lat: {pos.lat.toFixed(5)}, Long: {pos.lon.toFixed(5)}
+          <div className="flex flex-col">
+            <strong className="font-semibold">Lat: <span className="font-normal">{pos.lat}</span></strong>
+            <strong className="font-semibold">Long: <span className="font-normal">{pos.lon}</span></strong>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
-          Status:
+
           {state?.name === "Parado" ? (
             <span className="text-red-500">⛔</span>
           ) : state?.name === "Manutenção" ? (
