@@ -29,7 +29,7 @@ import {
   IEquipmentStateHistory,
 } from "./interface/Imap";
 
-const MapBounds = ({ positions }: { positions: [number, number][] }) => {
+const AdjustMapPosition = ({ positions }: { positions: [number, number][] }) => {
   const map = useMap();
 
   useEffect(() => {
@@ -43,9 +43,9 @@ const MapBounds = ({ positions }: { positions: [number, number][] }) => {
 
 const Map = () => {
   const [mapPosition, setMapPosition] = useState<IEquipmentPositionHistory[]>([]);
-  const [stateHistory, setStateHistory] = useState<IEquipmentStateHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [stateHistory, setStateHistory] = useState<IEquipmentStateHistory[]>([]);
   const [equipmentStatus, setEquipmentStatus] = useState<IEquipmentState[]>([]);
   const [equipmentList, setEquipmentList] = useState<IEquipment[]>([]);
   const [equipmentModels, setEquipmentModel] = useState<IEquipmentModel[]>([]);
@@ -89,51 +89,52 @@ const Map = () => {
   if (error) return <p>{error}</p>;
 
   const latestPositionsWithStatus = mapPosition.map((equipment) => {
-    const sortedPositions = [...equipment.positions].sort(
+
+    const positionsSortedByDate = [...equipment.positions].sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
-    const latestPos = sortedPositions[0];
+    const latestPosition = positionsSortedByDate[0];
 
-    const stateHistories = stateHistory.find(
-      (s) => s.equipmentId === equipment.equipmentId
+    const equipmentStateHistory = stateHistory.find(
+      (item) => item.equipmentId === equipment.equipmentId
     )?.states || [];
 
-    const matchingState = stateHistories
-      .filter((s) => new Date(s.date) <= new Date(latestPos.date))
+    const latestValidState  = equipmentStateHistory
+      .filter((item) => new Date(item.date) <= new Date(latestPosition.date))
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
-    const stateDetails = equipmentStatus.find(
-      (s) => s.id === matchingState?.equipmentStateId
+    const statusInfo = equipmentStatus.find(
+      (item) => item.id === latestValidState ?.equipmentStateId
     );
 
     const equipmentInfo = equipmentList.find(
-      (e) => e.id === equipment.equipmentId
+      (item) => item.id === equipment.equipmentId
     );
 
     const modelInfo = equipmentModels.find(
-      (m) => m.id === equipmentInfo?.equipmentModelId
+      (item) => item.id === equipmentInfo?.equipmentModelId
     );
 
     return {
       equipmentId: equipment.equipmentId,
-      lat: latestPos.lat,
-      lon: latestPos.lon,
-      date: latestPos.date,
-      stateName: stateDetails?.name ?? "Desconhecido",
-      stateColor: stateDetails?.color ?? "#ccc",
+      lat: latestPosition.lat,
+      lon: latestPosition.lon,
+      date: latestPosition.date,
+      stateName: statusInfo?.name ?? "Desconhecido",
+      stateColor: statusInfo?.color ?? "#ccc",
       equipmentName: equipmentInfo?.name ?? "Sem nome",
       modelName: modelInfo?.name ?? "Sem modelo",
     };
   });
 
-  // Filtro combinado (status e nome)
+
   const filteredEquipments = latestPositionsWithStatus.filter((item) => {
     const matchesStatus = filterStatus === "todos" || item.stateName === filterStatus;
     const matchesName = item.equipmentName.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesStatus && matchesName;
   });
 
-  const bounds: [number, number][] = filteredEquipments.map((position) => [
+  const coordinates: [number, number][] = filteredEquipments.map((position) => [
     position.lat,
     position.lon,
   ]);
@@ -146,11 +147,11 @@ const Map = () => {
         <div className="flex flex-col gap-2 w-[150px]">
             <h1 className="text-2xl">Filtros</h1>
             <Label>Nome do equipamento</Label>
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Digite..."
-          />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Digite..."
+            />
           <Label>Status</Label>
           <Select onValueChange={(value) => setFilterStatus(value)} defaultValue="todos">
             <SelectTrigger>
@@ -178,7 +179,7 @@ const Map = () => {
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            <MapBounds positions={bounds} />
+            <AdjustMapPosition positions={coordinates} />
 
             {filteredEquipments.map((item) => (
               <Marker key={item.equipmentId} position={[item.lat, item.lon]}>
@@ -192,16 +193,16 @@ const Map = () => {
                       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                       .slice(0, 5)
                       .map((pos, index) => {
-                        const stateHistories = stateHistory.find(
+                        const equipmentStateHistory = stateHistory.find(
                           (s) => s.equipmentId === item.equipmentId
                         )?.states || [];
 
-                        const matchingState = stateHistories
+                        const latestValidState = equipmentStateHistory
                           .filter((s) => new Date(s.date) <= new Date(pos.date))
                           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
-                        const state = equipmentStatus.find(
-                          (s) => s.id === matchingState?.equipmentStateId
+                        const stateDetails = equipmentStatus.find(
+                          (s) => s.id === latestValidState?.equipmentStateId
                         );
 
                         return (
@@ -220,11 +221,11 @@ const Map = () => {
                             </div>
 
                             <div className="flex items-center gap-2">
-                              {state?.name === "Parado" ? (
+                              {stateDetails?.name === "Parado" ? (
                                 <span className="text-red-500">⛔</span>
-                              ) : state?.name === "Manutenção" ? (
+                              ) : stateDetails?.name === "Manutenção" ? (
                                 <span className="text-yellow-500">🛠️</span>
-                              ) : state?.name === "Operando" ? (
+                              ) : stateDetails?.name === "Operando" ? (
                                 <span className="text-green-500">✅</span>
                               ) : (
                                 <span className="text-gray-500">❓</span>
@@ -232,11 +233,11 @@ const Map = () => {
 
                               <span
                                 style={{
-                                  color: state?.color ?? "#000",
+                                  color: stateDetails?.color ?? "#000",
                                   fontWeight: "bold",
                                 }}
                               >
-                                {state?.name ?? "Desconhecido"}
+                                {stateDetails?.name ?? "Desconhecido"}
                               </span>
                             </div>
                           </div>
