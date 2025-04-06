@@ -1,8 +1,9 @@
+
 import Map from "../map/map";
 
 export const Homepage = () => {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-700">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-600">
       {/* <h1 className="text-3xl font-bold text-blue-600 underline hover:text-blue-800">
         Hello World!
       </h1>
