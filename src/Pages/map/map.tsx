@@ -11,6 +11,7 @@ import {
   useMap,
 } from "react-leaflet";
 
+import Logo from "../../../img/aiko.png"
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Progress } from "../../components/ui/progress";
@@ -140,12 +141,12 @@ const Map = () => {
   ]);
 
   return (
-    <div className="flex h-screen w-screen flex-col items-center justify-center">
-      <h1 className="text-3xl font-semibold">Equipamentos localizados</h1>
-
-      <div className="mt-3 flex h-2/3 w-3/4 gap-6">
-        <div className="flex flex-col gap-2 w-[150px]">
-            <h1 className="text-2xl">Filtros</h1>
+    <div className="flex h-screen flex-col items-center justify-center">
+      <img src={Logo} alt="Logo" width={200} height={200} />
+      <h1 className="text-4xl font-bold text-gray-800 mb-6 text-center">Equipamentos Localizados</h1>
+      <div className="mt-3 flex h-[80vh] w-full max-w-[1200px] flex-row gap-6">
+        <div className="flex flex-col gap-4 w-[250px] bg-white p-4 rounded-xl shadow">
+            <h2 className="text-xl font-semibold text-gray-700">Filtros</h2>
             <Label>Nome do equipamento</Label>
             <Input
               value={searchQuery}
@@ -170,7 +171,7 @@ const Map = () => {
 
         <div className="flex-1">
           <MapContainer
-            className="h-full w-full"
+            className="h-full w-full rounded-xl shadow-md z-0"
             center={[-19.15, -46.05]}
             zoom={10}
             scrollWheelZoom={false}
@@ -221,23 +222,27 @@ const Map = () => {
                             </div>
 
                             <div className="flex items-center gap-2">
-                              {stateDetails?.name === "Parado" ? (
-                                <span className="text-red-500">⛔</span>
-                              ) : stateDetails?.name === "Manutenção" ? (
-                                <span className="text-yellow-500">🛠️</span>
-                              ) : stateDetails?.name === "Operando" ? (
-                                <span className="text-green-500">✅</span>
-                              ) : (
-                                <span className="text-gray-500">❓</span>
-                              )}
-
                               <span
-                                style={{
-                                  color: stateDetails?.color ?? "#000",
-                                  fontWeight: "bold",
-                                }}
+                                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium
+                                  ${
+                                    stateDetails?.name === "Operando"
+                                      ? "bg-green-100 text-green-800"
+                                      : stateDetails?.name === "Parado"
+                                      ? "bg-red-100 text-red-800"
+                                      : stateDetails?.name === "Manutenção"
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-gray-100 text-gray-800"
+                                  }`}
                               >
-                                {stateDetails?.name ?? "Desconhecido"}
+                                {stateDetails?.name === "Parado" ? "⛔" : ""}
+                                {stateDetails?.name === "Manutenção" ? "🛠️" : ""}
+                                {stateDetails?.name === "Operando" ? "✅" : ""}
+                                {stateDetails?.name !== "Parado" &&
+                                stateDetails?.name !== "Manutenção" &&
+                                stateDetails?.name !== "Operando"
+                                  ? "❓"
+                                  : ""}
+                                <span>{stateDetails?.name ?? "Desconhecido"}</span>
                               </span>
                             </div>
                           </div>
@@ -246,20 +251,20 @@ const Map = () => {
                   </div>
                 </Popup>
                 <Tooltip direction="top" offset={[0, -20]} opacity={1} permanent={false}>
-                  <strong>Equipamento: </strong>{item.equipmentName}
-                  <br />
-                  <div>
-                    <strong>Modelo:</strong> {item.modelName}<br />
-                    <strong>Estado:</strong>&nbsp;
-                    <span style={{ color: item.stateColor, fontWeight: "bold" }}>
-                      {item.stateName}
-                    </span>
+                  <div className="bg-white p-2 rounded shadow text-sm">
+                    <strong>Equipamento: </strong>{item.equipmentName}
                     <br />
-                    <strong>Ultima atualização:</strong> {new Date(item.date).toLocaleString()}<br />
-                    <strong>Latitude:</strong> {item.lat}<br />
-                    <strong>Longitude:</strong> {item.lon}<br />
+                      <strong>Modelo:</strong> {item.modelName}<br />
+                      <strong>Estado:</strong>&nbsp;
+                      <span style={{ color: item.stateColor, fontWeight: "bold" }}>
+                        {item.stateName}
+                      </span>
+                      <br />
+                      <strong>Ultima atualização:</strong> {new Date(item.date).toLocaleString()}<br />
+                      <strong>Latitude:</strong> {item.lat}<br />
+                      <strong>Longitude:</strong> {item.lon}<br />
                   </div>
-                </Tooltip>
+                  </Tooltip>
               </Marker>
             ))}
           </MapContainer>
