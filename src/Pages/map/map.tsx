@@ -285,9 +285,9 @@ const Map = () => {
         <div className="flex-1">
           <MapContainer
             className="z-0 h-full w-full rounded-xl shadow-md"
-            center={[-19.15, -46.05]}
+            center={[0, 0]}
             zoom={10}
-            scrollWheelZoom={false}
+            scrollWheelZoom={true}
           >
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
