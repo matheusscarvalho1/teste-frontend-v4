@@ -90,13 +90,13 @@ A aplicação estará disponível em `http://localhost:5173`.
 ## 📱 Resultados
 
 - Irei seguir o fluxo do teste para ficar mais organizado
-- <strong>Posições dos equipamentos\*\*: Exibir no mapa os equipamentos nas suas posições mais recentes. ✅</strong>
+- <strong>Posições dos equipamentos Exibir no mapa os equipamentos nas suas posições mais recentes. ✅</strong>
   - (Clique na imagem para ver melhor)
     ![image](https://github.com/user-attachments/assets/860b86c4-a62f-4d78-ae39-3e656370caf0)
 
 <hr>
 
-- <strong>Estado atual do equipamento\*\*: Visualizar o estado mais recente dos equipamentos. Exemplo: mostrando no mapa, como um pop-up, mouse hover sobre o equipamento, etc. ✅ </strong>
+- <strong>Estado atual do equipamento: Visualizar o estado mais recente dos equipamentos. Exemplo: mostrando no mapa, como um pop-up, mouse hover sobre o equipamento, etc. ✅ </strong>
   - Na imagem abaixo é possível observer o efeito de hover mostrando os dados mais atualizados
   - - Nome do equipamento, Modelo, Estado, Produtividade diária, Última atualização, Latitude e Longitude do posição mais atualizada - (Clique na imagem para ver melhor)
       ![image](https://github.com/user-attachments/assets/32ecabd0-14ef-4994-9056-2bb30b91acc5)
