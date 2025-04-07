@@ -2,6 +2,7 @@
 
 ![Aiko](img/aiko.png)
 
+Link do vídeo com explicação e mostrando o funcionamento da aplicação: https://youtu.be/17s9jwKcIiI
 ## Visão Geral do Sistema
 
 ### Objetivo principal
