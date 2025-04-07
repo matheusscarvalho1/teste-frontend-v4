@@ -18,7 +18,7 @@ A aplicação fornece um painel de monitoramento para equipamentos em operaçõe
 ### Stack Principal
 
 - Frontend: React 19 com TypeScript;
-- Build: Vite ( Devido ao descontinuamento do (CRA) )
+- Build: Vite - Devido ao descontinuamento do (CRA) optei pelo vite
 - Estilização: TailwindCSS
 - Mapas: Leaflet + React-Leaflet : Optei pelo Leaflet devido a documentação bem rica e robusta
 - Biblioteca de Componentes: shadcn/ui \*
